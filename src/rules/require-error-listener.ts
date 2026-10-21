@@ -52,6 +52,19 @@ function escapes(id: Node): boolean {
   }
 }
 
+/** `x.close()` / `x.disconnect()`: a short-lived instance (admin query, health check, test). */
+function isClosed(id: Node): boolean {
+  const m = id.parent;
+  return (
+    m?.type === 'MemberExpression' &&
+    m.object === id &&
+    !m.computed &&
+    m.property.type === 'Identifier' &&
+    (m.property.name === 'close' || m.property.name === 'disconnect') &&
+    m.parent?.type === 'CallExpression'
+  );
+}
+
 const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
@@ -95,7 +108,7 @@ const rule: Rule.RuleModule = {
           const variable = findVariable(context, id);
           const ok = variable?.references.some((ref) => {
             const ident = ref.identifier as Node;
-            return isErrorListener(ident.parent, ident) || escapes(ident);
+            return isErrorListener(ident.parent, ident) || escapes(ident) || isClosed(ident);
           });
           if (ok || !variable) return;
         }

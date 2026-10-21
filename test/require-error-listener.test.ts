@@ -24,6 +24,9 @@ ruleTester.run('require-error-listener', rule, {
     imp + `const ws = [new Worker('q', fn)];`,
     imp + `w = new Worker('q', fn);`,
     imp + `const w = new Worker('q', fn); w['on']('error', f);`,
+    // regression (twenty admin panel): short-lived queue closed in finally
+    imp +
+      `async function count() { const queue = new Queue('q', { connection }); try { return await queue.getJobCounts(); } finally { await queue.close(); } }`,
     // not from bullmq
     `import { Worker } from 'node:worker_threads'; const w = new Worker('./x.js');`,
     `const w = new Worker('q', fn);`,
