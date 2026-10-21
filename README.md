@@ -49,7 +49,11 @@ Starting a new project? [create-bullmq-app](https://github.com/Krrishkumar125/cr
 a worker that already passes these rules. Webhook-driven queues: see also
 [eslint-plugin-webhook-safety](https://github.com/Krrishkumar125/eslint-plugin-webhook-safety).
 
-Requires ESLint ≥ 8.57 and Node ≥ 20. Not affiliated with Taskforce.sh / BullMQ.
+TypeScript: ESLint only lints `.ts` files that some config object matches, so combine it with `typescript-eslint`:
+`export default [...tseslint.configs.recommended, bullmq.configs.recommended];`
+
+Requires ESLint 8.57+, 9 or 10 and Node ≥ 20. Every release is smoke-tested from the packed tarball against ESLint
+8.57 (flat and legacy `.eslintrc`), 9, 10 and `@typescript-eslint/parser`, and the rules' tests run on Linux and Windows. Not affiliated with Taskforce.sh / BullMQ.
 
 ## License
 

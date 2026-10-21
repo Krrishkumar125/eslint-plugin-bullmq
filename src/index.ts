@@ -22,7 +22,7 @@ const strictRules: Linter.RulesRecord = Object.fromEntries(
 );
 
 const plugin = {
-  meta: { name: 'eslint-plugin-bullmq', version: '0.1.0' },
+  meta: { name: 'eslint-plugin-bullmq', version: '0.1.1' },
   rules,
   configs: {} as {
     recommended: Linter.Config & { rules: Linter.RulesRecord };

@@ -1,0 +1,9 @@
+{
+  "fixture": "worker.js",
+  "expected": [
+    "bullmq/require-error-listener",
+    "bullmq/worker-connection-max-retries",
+    "bullmq/valid-job-id",
+    "bullmq/no-jobid-dedupe-with-remove-on-complete"
+  ]
+}

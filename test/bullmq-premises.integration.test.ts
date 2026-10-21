@@ -2,20 +2,27 @@
 // If BullMQ ever changes this behaviour, this suite fails and the rule docs need updating.
 import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const url = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379';
 const connection = { url };
 const name = `eslint-plugin-bullmq-${process.pid}-${Date.now()}`;
-const queue = new Queue(name, { connection });
-queue.on('error', () => {});
+const skip = !!process.env.SKIP_REDIS_TESTS;
+let queue: Queue;
+
+beforeAll(() => {
+  if (skip) return;
+  queue = new Queue(name, { connection });
+  queue.on('error', () => {});
+});
 
 afterAll(async () => {
+  if (skip) return;
   await queue.obliterate({ force: true });
   await queue.close();
 });
 
-describe('BullMQ behaviour behind the rules', () => {
+describe.skipIf(skip)('BullMQ behaviour behind the rules', () => {
   it('valid-job-id: rejects ids containing ":"', async () => {
     await expect(queue.add('x', {}, { jobId: 'order:1' })).rejects.toThrow(/cannot contain :/);
   });

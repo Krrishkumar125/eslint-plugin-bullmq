@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (2026-10-22)
+
+- README: TypeScript setup and the supported ESLint versions.
+- Release smoke test now covers ESLint 8.57 (flat and legacy), 9, 10 and `@typescript-eslint/parser`. CI adds Windows.
+
 ## 0.1.0 (2026-10-22)
 
 - Rules: `require-error-listener`, `worker-connection-max-retries`, `valid-job-id`, `no-jobid-dedupe-with-remove-on-complete`.
