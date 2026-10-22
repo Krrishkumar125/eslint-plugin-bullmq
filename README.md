@@ -1,6 +1,8 @@
 # eslint-plugin-bullmq
 
 [![CI](https://github.com/Krrishkumar125/eslint-plugin-bullmq/actions/workflows/ci.yml/badge.svg)](https://github.com/Krrishkumar125/eslint-plugin-bullmq/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/eslint-plugin-bullmq)](https://www.npmjs.com/package/eslint-plugin-bullmq)
+[![downloads](https://img.shields.io/npm/dm/eslint-plugin-bullmq)](https://www.npmjs.com/package/eslint-plugin-bullmq)
 
 ESLint rules for the BullMQ mistakes in the official [going-to-production guide](https://docs.bullmq.io/guide/going-to-production). Each one is
 usually found in production first.
