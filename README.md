@@ -55,6 +55,17 @@ TypeScript: ESLint only lints `.ts` files that some config object matches, so co
 Requires ESLint 8.57+, 9 or 10 and Node ≥ 20. Every release is smoke-tested from the packed tarball against ESLint
 8.57 (flat and legacy `.eslintrc`), 9, 10 and `@typescript-eslint/parser`, and the rules' tests run on Linux and Windows. Not affiliated with Taskforce.sh / BullMQ.
 
+## Sibling packages
+
+Other tools by the same author:
+
+- [secret-blast-radius](https://www.npmjs.com/package/secret-blast-radius): what a malicious npm install could steal, plus a rotation plan
+- [zod-india](https://www.npmjs.com/package/zod-india): Zod schemas for GSTIN, PAN, IFSC, UPI and Aadhaar
+- [create-bullmq-app](https://www.npmjs.com/package/create-bullmq-app): scaffold a production BullMQ + TypeScript service
+- [webhook-crash-lab](https://www.npmjs.com/package/webhook-crash-lab): crash-test webhook handlers against duplicates and races
+- [webhook-crash-lab-mcp](https://www.npmjs.com/package/webhook-crash-lab-mcp): MCP server so coding agents can run webhook-crash-lab
+- [eslint-plugin-webhook-safety](https://www.npmjs.com/package/eslint-plugin-webhook-safety): lint rules for unsafe Stripe webhook handlers
+
 ## License
 
 MIT © Krrish Kumar

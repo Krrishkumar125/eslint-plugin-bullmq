@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-bullmq",
   "version": "0.1.1",
-  "description": "ESLint rules for BullMQ production pitfalls from the official going-to-production guide: missing error listeners, worker connections without maxRetriesPerRequest: null, invalid custom job ids, and jobId dedupe that removeOnComplete silently disables.",
+  "description": "ESLint rules for BullMQ production pitfalls: missing error listeners, bad worker connections, broken jobId dedupe.",
   "license": "MIT",
   "author": "Krrish Kumar (https://github.com/Krrishkumar125)",
   "repository": {
@@ -9,17 +9,20 @@
     "url": "git+https://github.com/Krrishkumar125/eslint-plugin-bullmq.git"
   },
   "homepage": "https://github.com/Krrishkumar125/eslint-plugin-bullmq#readme",
-  "bugs": "https://github.com/Krrishkumar125/eslint-plugin-bullmq/issues",
+  "bugs": {
+    "url": "https://github.com/Krrishkumar125/eslint-plugin-bullmq/issues"
+  },
   "keywords": [
     "eslint",
     "eslintplugin",
     "eslint-plugin",
     "bullmq",
     "redis",
-    "queue",
     "ioredis",
+    "queue",
+    "worker",
     "jobs",
-    "worker"
+    "lint"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
