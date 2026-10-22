@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-bullmq",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ESLint rules for BullMQ production pitfalls: missing error listeners, bad worker connections, broken jobId dedupe.",
   "license": "MIT",
   "author": "Krrish Kumar (https://github.com/Krrishkumar125)",

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (2026-10-23)
+
+- npm metadata: shorter description, focused keywords, homepage/bugs links; README links sibling packages.
+
 ## 0.1.1 (2026-10-22)
 
 - README: TypeScript setup and the supported ESLint versions.
