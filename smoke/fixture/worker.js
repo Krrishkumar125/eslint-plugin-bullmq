@@ -8,3 +8,7 @@ queue.on('error', console.error);
 const worker = new Worker('emails', async () => {}, { connection });
 
 await queue.add('welcome', { userId: 7 }, { jobId: 'user:7', removeOnComplete: true });
+
+export function signup(user) {
+  queue.add('verify', { userId: user.id });
+}

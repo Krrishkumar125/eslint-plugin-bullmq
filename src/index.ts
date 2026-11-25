@@ -1,5 +1,6 @@
 import type { ESLint, Linter, Rule } from 'eslint';
 import noDedupeRemove from './rules/no-jobid-dedupe-with-remove-on-complete.js';
+import noFloatingQueueAdd from './rules/no-floating-queue-add.js';
 import requireErrorListener from './rules/require-error-listener.js';
 import validJobId from './rules/valid-job-id.js';
 import workerConnectionMaxRetries from './rules/worker-connection-max-retries.js';
@@ -9,6 +10,7 @@ const rules: Record<string, Rule.RuleModule> = {
   'worker-connection-max-retries': workerConnectionMaxRetries,
   'valid-job-id': validJobId,
   'no-jobid-dedupe-with-remove-on-complete': noDedupeRemove,
+  'no-floating-queue-add': noFloatingQueueAdd,
 };
 
 const recommendedRules: Linter.RulesRecord = {
@@ -16,6 +18,7 @@ const recommendedRules: Linter.RulesRecord = {
   'bullmq/worker-connection-max-retries': 'error',
   'bullmq/valid-job-id': 'error',
   'bullmq/no-jobid-dedupe-with-remove-on-complete': 'warn',
+  'bullmq/no-floating-queue-add': 'error',
 };
 const strictRules: Linter.RulesRecord = Object.fromEntries(
   Object.keys(recommendedRules).map((k) => [k, 'error']),

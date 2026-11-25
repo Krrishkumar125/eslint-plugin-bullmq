@@ -4,6 +4,7 @@
     "bullmq/require-error-listener",
     "bullmq/worker-connection-max-retries",
     "bullmq/valid-job-id",
-    "bullmq/no-jobid-dedupe-with-remove-on-complete"
+    "bullmq/no-jobid-dedupe-with-remove-on-complete",
+    "bullmq/no-floating-queue-add"
   ]
 }
