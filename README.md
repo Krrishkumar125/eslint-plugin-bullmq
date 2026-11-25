@@ -7,12 +7,17 @@
 ESLint rules for the BullMQ mistakes in the official [going-to-production guide](https://docs.bullmq.io/guide/going-to-production). Each one is
 usually found in production first.
 
-| Rule                                                                                             | What it catches                                                | recommended | strict | 💡  |
-| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ----------- | ------ | --- |
-| [require-error-listener](docs/rules/require-error-listener.md)                                   | `Worker`/`Queue` with no `'error'` listener                    | error       | error  |     |
-| [worker-connection-max-retries](docs/rules/worker-connection-max-retries.md)                     | worker ioredis connection without `maxRetriesPerRequest: null` | error       | error  | ✅  |
-| [valid-job-id](docs/rules/valid-job-id.md)                                                       | custom `jobId` containing `:` or an integer (BullMQ throws)    | error       | error  | ✅  |
-| [no-jobid-dedupe-with-remove-on-complete](docs/rules/no-jobid-dedupe-with-remove-on-complete.md) | `jobId` dedupe silently disabled by `removeOnComplete: true`   | warn        | error  |     |
+| Rule                                                                                             | What it catches                                                | recommended | strict | 🔧  | 💡  |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ----------- | ------ | --- | --- |
+| [require-error-listener](docs/rules/require-error-listener.md)                                   | `Worker`/`Queue` with no `'error'` listener                    | error       | error  |     |     |
+| [worker-connection-max-retries](docs/rules/worker-connection-max-retries.md)                     | worker ioredis connection without `maxRetriesPerRequest: null` | error       | error  | ✅  | ✅  |
+| [valid-job-id](docs/rules/valid-job-id.md)                                                       | custom `jobId` containing `:` or an integer (BullMQ throws)    | error       | error  | ✅  | ✅  |
+| [no-jobid-dedupe-with-remove-on-complete](docs/rules/no-jobid-dedupe-with-remove-on-complete.md) | `jobId` dedupe silently disabled by `removeOnComplete: true`   | warn        | error  |     | ✅  |
+| [no-floating-queue-add](docs/rules/no-floating-queue-add.md)                                     | `queue.add()` / `addBulk()` whose promise nobody awaits        | error       | error  | ✅  |     |
+
+🔧 `eslint --fix` applies it. 💡 your editor offers it. `--fix` only makes changes that cannot alter working code: it adds
+`await` where that is valid, sets `maxRetriesPerRequest: null` on a client only the Worker uses, and swaps `:` in a job id BullMQ
+would reject anyway.
 
 Every behaviour the rules warn about is checked against **real Redis + the real `bullmq` package**
 in [`test/bullmq-premises.integration.test.ts`](test/bullmq-premises.integration.test.ts).
@@ -35,6 +40,9 @@ export default [bullmq.configs.recommended]; // or bullmq.configs.strict
 const connection = new IORedis(process.env.REDIS_URL);
 const worker = new Worker('emails', processor, { connection });
 await queue.add('welcome', data, { jobId: `user:${id}`, removeOnComplete: true });
+export function signup(user) {
+  queue.add('verify', { userId: user.id });
+}
 ```
 
 ```text
@@ -43,7 +51,28 @@ $ npx eslint worker.js
   2:16  error    This Worker has no 'error' listener ...                                                           bullmq/require-error-listener
   3:44  error    BullMQ uses ':' as its Redis key separator, so a custom jobId containing ':' is rejected ...       bullmq/valid-job-id
   3:63  warning  removeOnComplete: true deletes the job as soon as it finishes ...                                 bullmq/no-jobid-dedupe-with-remove-on-complete
+  5:3   error    queue.add() returns a promise that is not awaited or handled ...                                  bullmq/no-floating-queue-add
 ```
+
+## Compared with @boring-stack-pkg/eslint-plugin-bullmq
+
+[@boring-stack-pkg/eslint-plugin-bullmq](https://www.npmjs.com/package/@boring-stack-pkg/eslint-plugin-bullmq) (0.1.3) has a
+similar name and different rules, so the two can run side by side. Its rules enforce conventions: set `removeOnComplete` and
+`removeOnFail`, set `attempts` and `backoff`, declare `close()` on classes that own a Worker, listen for `'failed'`, constant job
+names, no zero concurrency. This plugin targets the cases where BullMQ throws or silently misbehaves.
+
+|                                                        | @boring-stack-pkg 0.1.3 | **eslint-plugin-bullmq** |
+| ------------------------------------------------------ | ----------------------- | ------------------------ |
+| Worker connection without `maxRetriesPerRequest: null` | no                      | yes, with `--fix`        |
+| Job id BullMQ rejects (`:` or an integer)              | no                      | yes, with `--fix`        |
+| `jobId` dedupe turned off by `removeOnComplete: true`  | no                      | yes, suggests `{ age }`  |
+| Un-awaited `queue.add()` without type information      | no                      | yes, with `--fix`        |
+| `'error'` listener on Worker and Queue                 | listens for `'failed'`  | yes                      |
+| Retention and retry settings required                  | yes                     | no, use theirs           |
+| `eslint --fix`                                         | no rule is fixable      | 3 rules                  |
+
+If you use both: their `queue-options-must-set-removeoncomplete` is satisfied by `removeOnComplete: { age: 86400 }`, which keeps
+jobId dedupe working, while `removeOnComplete: true` passes theirs and breaks dedupe.
 
 Legacy `.eslintrc` (ESLint 8): `{ "extends": ["plugin:bullmq/legacy-recommended"] }`.
 
