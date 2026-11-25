@@ -2,7 +2,7 @@
 
 Warn when `jobId` deduplication is combined with `removeOnComplete: true`.
 
-💼 `recommended` (warn), `strict` (error)
+💼 `recommended` (warn), `strict` (error) · 💡 has suggestions (`removeOnComplete: { age: 86400 }`)
 
 ## Why
 
@@ -26,3 +26,9 @@ queue.add('receipt', data, { jobId: event.id, removeOnComplete: { age: 3 * 24 * 
 // or BullMQ's dedicated API
 queue.add('receipt', data, { deduplication: { id: event.id, ttl: 3 * 24 * 3600 * 1000 } });
 ```
+
+## Suggestion
+
+Editors offer to replace the value with `{ age: 86400 }`, which keeps completed jobs, and so the dedupe, for a day while still
+bounding Redis memory. It is a suggestion and not a `--fix`, because the right window depends on how late your duplicates arrive.
+This also answers rules that require `removeOnComplete` to be set: an age satisfies them without turning dedupe off.

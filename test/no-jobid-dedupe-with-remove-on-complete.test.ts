@@ -12,11 +12,21 @@ ruleTester.run('no-jobid-dedupe-with-remove-on-complete', rule, {
   invalid: [
     {
       code: `queue.add('x', d, { jobId: event.id, removeOnComplete: true });`,
-      errors: [{ messageId: 'conflict' }],
+      errors: [
+        {
+          messageId: 'conflict',
+          suggestions: [
+            {
+              messageId: 'keepForADay',
+              output: `queue.add('x', d, { jobId: event.id, removeOnComplete: { age: 86400 } });`,
+            },
+          ],
+        },
+      ],
     },
     {
       code: `queue.add('x', d, { jobId: id, removeOnComplete: 0 });`,
-      errors: [{ messageId: 'conflict' }],
+      errors: [{ messageId: 'conflict', suggestions: 1 }],
     },
     {
       code: `import { Queue } from 'bullmq';

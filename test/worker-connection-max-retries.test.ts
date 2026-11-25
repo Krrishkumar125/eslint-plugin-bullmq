@@ -30,6 +30,8 @@ ruleTester.run('worker-connection-max-retries', rule, {
   invalid: [
     {
       code: imp + `new Worker('q', fn, { connection: new IORedis({}) });`,
+      output:
+        imp + `new Worker('q', fn, { connection: new IORedis({ maxRetriesPerRequest: null }) });`,
       errors: [
         {
           messageId: 'instance',
@@ -50,10 +52,13 @@ ruleTester.run('worker-connection-max-retries', rule, {
     },
     {
       code: imp + `new Worker('q', fn, { connection: { maxRetriesPerRequest: -1 } });`,
+      output: imp + `new Worker('q', fn, { connection: { maxRetriesPerRequest: null } });`,
       errors: [{ messageId: 'explicit', suggestions: 1 }],
     },
     {
+      // a shared client may serve other code, so --fix leaves it alone
       code: imp + `const connection = new IORedis();\nnew Worker('q', fn, { connection });`,
+      output: null,
       errors: [
         {
           messageId: 'instance',
@@ -89,6 +94,9 @@ ruleTester.run('worker-connection-max-retries', rule, {
     },
     {
       code: imp + `new Worker('q', fn, { connection: new IORedis(url) });`,
+      output:
+        imp +
+        `new Worker('q', fn, { connection: new IORedis(url, { maxRetriesPerRequest: null }) });`,
       errors: [
         {
           messageId: 'instance',
@@ -105,6 +113,7 @@ ruleTester.run('worker-connection-max-retries', rule, {
     },
     {
       code: imp + `new Worker('q', fn, { connection: { host, maxRetriesPerRequest: 3 } });`,
+      output: imp + `new Worker('q', fn, { connection: { host, maxRetriesPerRequest: null } });`,
       errors: [
         {
           messageId: 'explicit',

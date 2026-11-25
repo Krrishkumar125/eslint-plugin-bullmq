@@ -2,7 +2,7 @@
 
 Require `maxRetriesPerRequest: null` on ioredis connections used by BullMQ Workers and QueueEvents.
 
-💼 `recommended` (error), `strict` (error) · 💡 has suggestions
+💼 `recommended` (error), `strict` (error) · 🔧 fixable with `--fix` · 💡 has suggestions
 
 ## Why
 
@@ -26,3 +26,9 @@ because a finite value (fail fast) is what you want for a `Queue` used inside HT
 ❌ `const connection = new IORedis(process.env.REDIS_URL);`
 
 ✅ `const connection = new IORedis(process.env.REDIS_URL, { maxRetriesPerRequest: null });`
+
+## Fix
+
+`--fix` adds `maxRetriesPerRequest: null` (or replaces a finite value) when the client is created inline in the Worker or
+QueueEvents options, where nothing else uses it. A client declared in a variable may serve other code too, so for that case the
+change is offered as an editor suggestion and `--fix` leaves it alone.

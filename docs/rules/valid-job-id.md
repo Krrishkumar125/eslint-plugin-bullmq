@@ -2,7 +2,7 @@
 
 Disallow BullMQ custom job ids that contain `:` or are integers.
 
-💼 `recommended` (error), `strict` (error) · 💡 has suggestions (`:` → `-`)
+💼 `recommended` (error), `strict` (error) · 🔧 fixable with `--fix` (`:` → `-`) · 💡 has suggestions
 
 ## Why
 
@@ -20,3 +20,9 @@ String, number and template literals passed as `jobId` in `queue.add(name, data,
 ❌ `queue.add('sync', data, { jobId: \`user:${id}\` })`·`{ jobId: '42' }`
 
 ✅ `queue.add('sync', data, { jobId: \`user-${id}\` })`·`{ jobId: 'order-42' }`
+
+## Fix
+
+`--fix` replaces `:` with `-` in a literal or template `jobId`. BullMQ rejects such an id, so no job with the old id can exist
+and the change cannot break deduplication of jobs already in Redis. Integer ids are reported without a fix, since the right prefix
+is yours to pick.

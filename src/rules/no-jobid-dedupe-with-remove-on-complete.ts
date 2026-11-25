@@ -8,6 +8,7 @@ const removesImmediately = (p: ESTree.Property | undefined): boolean =>
 const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
+    hasSuggestions: true,
     docs: {
       description:
         'Warn when jobId deduplication is combined with removeOnComplete: true, which lets duplicates run again',
@@ -18,6 +19,7 @@ const rule: Rule.RuleModule = {
     messages: {
       conflict:
         'removeOnComplete: true deletes the job as soon as it finishes, so a later add() with the same jobId runs again. The jobId only dedupes while the job is still waiting or active. Keep completed jobs for your dedupe window with removeOnComplete: { age: <seconds> }, or use deduplication: { id, ttl }.',
+      keepForADay: 'Keep completed jobs for a day: removeOnComplete: { age: 86400 }',
       conflictDefault:
         "This queue's defaultJobOptions has removeOnComplete: true, so this jobId only dedupes while the job is still waiting or active. A redelivery after completion runs again. Use removeOnComplete: { age: <seconds> } or deduplication: { id, ttl }.",
     },
@@ -49,7 +51,14 @@ const rule: Rule.RuleModule = {
         if (!isJobOptions(node as Node) || !getProp(node, 'jobId')) return;
         const remove = getProp(node, 'removeOnComplete');
         if (removesImmediately(remove)) {
-          context.report({ node: remove as ESTree.Property, messageId: 'conflict' });
+          const prop = remove as ESTree.Property;
+          context.report({
+            node: prop,
+            messageId: 'conflict',
+            suggest: [
+              { messageId: 'keepForADay', fix: (f) => f.replaceText(prop.value, '{ age: 86400 }') },
+            ],
+          });
           return;
         }
         const call = (node as Node).parent;

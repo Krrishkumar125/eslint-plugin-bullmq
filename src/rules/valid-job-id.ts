@@ -4,6 +4,7 @@ import { docsUrl, isJobOptions, propKey, type Node } from '../utils.js';
 const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
+    fixable: 'code',
     hasSuggestions: true,
     docs: {
       description: "Disallow BullMQ custom job ids that contain ':' or are integers",
@@ -31,15 +32,12 @@ const rule: Rule.RuleModule = {
             if (/^\d+$/.test(v.value)) context.report({ node: v, messageId: 'integer' });
             else if (v.value.includes(':')) {
               const raw = context.sourceCode.getText(v);
+              const replace: Rule.ReportFixer = (f) => f.replaceText(v, raw.replace(/:/g, '-'));
               context.report({
                 node: v,
                 messageId: 'colon',
-                suggest: [
-                  {
-                    messageId: 'replaceColon',
-                    fix: (f) => f.replaceText(v, raw.replace(/:/g, '-')),
-                  },
-                ],
+                fix: replace,
+                suggest: [{ messageId: 'replaceColon', fix: replace }],
               });
             }
           }
@@ -47,18 +45,15 @@ const rule: Rule.RuleModule = {
           v.type === 'TemplateLiteral' &&
           v.quasis.some((q) => q.value.raw.includes(':'))
         ) {
+          const replace: Rule.ReportFixer = (f) =>
+            v.quasis
+              .filter((q) => q.value.raw.includes(':'))
+              .map((q) => f.replaceText(q, context.sourceCode.getText(q).replace(/:/g, '-')));
           context.report({
             node: v,
             messageId: 'colon',
-            suggest: [
-              {
-                messageId: 'replaceColon',
-                fix: (f) =>
-                  v.quasis
-                    .filter((q) => q.value.raw.includes(':'))
-                    .map((q) => f.replaceText(q, context.sourceCode.getText(q).replace(/:/g, '-'))),
-              },
-            ],
+            fix: replace,
+            suggest: [{ messageId: 'replaceColon', fix: replace }],
           });
         }
       },

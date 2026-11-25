@@ -20,6 +20,7 @@ const REDIS_FALLBACK = /^(IO)?Redis$|^Cluster$/;
 const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
+    fixable: 'code',
     hasSuggestions: true,
     docs: {
       description:
@@ -46,7 +47,9 @@ const rule: Rule.RuleModule = {
       resolveClass(n, ioredis) !== undefined ||
       (n.callee.type === 'Identifier' && REDIS_FALLBACK.test(n.callee.name));
 
-    function checkObject(obj: ESTree.ObjectExpression): 'ok' | 'missing' {
+    // `shared`: the client is declared elsewhere and may serve other code, so
+    // changing its retry policy is offered as a suggestion, not applied by --fix.
+    function checkObject(obj: ESTree.ObjectExpression, shared = false): 'ok' | 'missing' {
       const prop = getProp(obj, 'maxRetriesPerRequest');
       if (!prop) return hasSpread(obj) ? 'ok' : 'missing';
       const v = prop.value;
@@ -54,22 +57,24 @@ const rule: Rule.RuleModule = {
       if (v.type === 'Literal' || (v.type === 'UnaryExpression' && v.argument.type === 'Literal')) {
         if (!reported.has(prop)) {
           reported.add(prop);
+          const setNull: Rule.ReportFixer = (f) => f.replaceText(v, 'null');
           context.report({
             node: prop,
             messageId: 'explicit',
-            suggest: [{ messageId: 'setNull', fix: (f) => f.replaceText(v, 'null') }],
+            fix: shared ? null : setNull,
+            suggest: [{ messageId: 'setNull', fix: setNull }],
           });
         }
       }
       return 'ok';
     }
 
-    function checkInstance(n: ESTree.NewExpression, kind: string): void {
+    function checkInstance(n: ESTree.NewExpression, kind: string, shared: boolean): void {
       if (reported.has(n)) return;
       const args = n.arguments as ESTree.Node[];
       const last = args[args.length - 1];
       if (last?.type === 'ObjectExpression') {
-        if (checkObject(last) === 'ok') return;
+        if (checkObject(last, shared) === 'ok') return;
       } else if (
         args.some(
           (a) =>
@@ -83,26 +88,23 @@ const rule: Rule.RuleModule = {
       }
       reported.add(n);
       const prop = 'maxRetriesPerRequest: null';
+      const addNull: Rule.ReportFixer = (fixer) => {
+        if (last?.type === 'ObjectExpression') {
+          const lastProp = last.properties[last.properties.length - 1];
+          return lastProp
+            ? fixer.insertTextAfter(lastProp, `, ${prop}`)
+            : fixer.replaceText(last, `{ ${prop} }`);
+        }
+        if (last) return fixer.insertTextAfter(last, `, { ${prop} }`);
+        const end = (n.range?.[1] ?? 1) - 1;
+        return fixer.insertTextBeforeRange([end, end], `{ ${prop} }`);
+      };
       context.report({
         node: n,
         messageId: 'instance',
         data: { kind },
-        suggest: [
-          {
-            messageId: 'addNull',
-            fix: (fixer) => {
-              if (last?.type === 'ObjectExpression') {
-                const lastProp = last.properties[last.properties.length - 1];
-                return lastProp
-                  ? fixer.insertTextAfter(lastProp, `, ${prop}`)
-                  : fixer.replaceText(last, `{ ${prop} }`);
-              }
-              if (last) return fixer.insertTextAfter(last, `, { ${prop} }`);
-              const end = (n.range?.[1] ?? 1) - 1;
-              return fixer.insertTextBeforeRange([end, end], `{ ${prop} }`);
-            },
-          },
-        ],
+        fix: shared ? null : addNull,
+        suggest: [{ messageId: 'addNull', fix: addNull }],
       });
     }
 
@@ -122,12 +124,12 @@ const rule: Rule.RuleModule = {
         if (conn.type === 'ObjectExpression') {
           checkObject(conn);
         } else if (conn.type === 'NewExpression' && isRedis(conn)) {
-          checkInstance(conn, kind);
+          checkInstance(conn, kind, false);
         } else if (conn.type === 'Identifier') {
           const def = findVariable(context, conn)?.defs[0];
           const init =
             def?.node.type === 'VariableDeclarator' ? (def.node.init as Node | null) : null;
-          if (init?.type === 'NewExpression' && isRedis(init)) checkInstance(init, kind);
+          if (init?.type === 'NewExpression' && isRedis(init)) checkInstance(init, kind, true);
         }
       },
     };

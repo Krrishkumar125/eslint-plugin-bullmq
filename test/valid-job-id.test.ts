@@ -13,6 +13,7 @@ ruleTester.run('valid-job-id', rule, {
   invalid: [
     {
       code: `queue.add('x', data, { jobId: 'order:42' });`,
+      output: `queue.add('x', data, { jobId: 'order-42' });`,
       errors: [
         {
           messageId: 'colon',
@@ -24,6 +25,7 @@ ruleTester.run('valid-job-id', rule, {
     },
     {
       code: "queue.add('x', data, { jobId: `user:${id}:sync` });",
+      output: "queue.add('x', data, { jobId: `user-${id}-sync` });",
       errors: [
         {
           messageId: 'colon',
@@ -40,6 +42,7 @@ ruleTester.run('valid-job-id', rule, {
     { code: `queue.add('x', data, { jobId: 42 });`, errors: [{ messageId: 'integer' }] },
     {
       code: `flow.add({ name: 'p', queueName: 'q', opts: { jobId: 'a:b' }, children: [] });`,
+      output: `flow.add({ name: 'p', queueName: 'q', opts: { jobId: 'a-b' }, children: [] });`,
       errors: [{ messageId: 'colon', suggestions: 1 }],
     },
   ],
