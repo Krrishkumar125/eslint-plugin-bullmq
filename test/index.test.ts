@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { ESLint } from 'eslint';
 import { describe, expect, it } from 'vitest';
 import plugin from '../src/index.js';
@@ -34,5 +35,10 @@ describe('plugin', () => {
       'bullmq/valid-job-id',
       'bullmq/worker-connection-max-retries',
     ]);
+  });
+
+  it('reports the version in package.json', () => {
+    const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    expect(plugin.meta.version).toBe(pkg.version);
   });
 });
