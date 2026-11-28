@@ -116,8 +116,7 @@ const rule: Rule.RuleModule = {
       },
       'Program:exit'() {
         const src = context.sourceCode;
-        const moduleCode =
-          (context.languageOptions?.sourceType ?? context.parserOptions?.sourceType) === 'module';
+        const moduleCode = src.ast.sourceType === 'module';
         for (const { call, name, inCallback } of candidates) {
           if (!producers.has(name)) continue;
           const callee = call.callee as ESTree.MemberExpression;
